@@ -1,6 +1,8 @@
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilies, FlexibleInstances, UndecidableInstances #-}
 
 module Hungry where
+
+import Control.Monad.State
 
 class Hungry a where
     type Bit a
@@ -15,17 +17,27 @@ class Process a where
     type Result a
     run :: a -> Input a -> (Result a, a)
 
+instance (Process p) => Hungry p where
+    type Bit a = Input a
+    eat p b = snd $ run p b
+
+runProcess :: (MonadState p m, Process p) => Input p -> m (Result p)
+runProcess = state . flip run
+
 
 newtype Accum = Accum { unAccum :: Int }
-
-instance Hungry Accum where
-    type Bit Accum = Int
-    eat acc n = Accum $ unAccum acc + n
 
 instance Process Accum where
     type Input Accum = Int
     type Result Accum = Int
     run acc n = let sum = unAccum acc + n in (sum, Accum sum)
+
+{-
+instance Hungry Accum where
+    type Bit Accum = Int
+    eat acc n = Accum $ unAccum acc + n
+-}
+
 
 demo :: IO ()
 demo = do

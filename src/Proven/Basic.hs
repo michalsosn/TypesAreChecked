@@ -1,11 +1,9 @@
-{-#LANGUAGE GADTs, TypeFamilies, DataKinds, PolyKinds, EmptyDataDecls, MultiParamTypeClasses, FunctionalDependencies, FlexibleContexts, ScopedTypeVariables, TypeOperators, ConstraintKinds, FlexibleInstances #-}
+{-#LANGUAGE GADTs, TypeFamilies, DataKinds, PolyKinds, EmptyDataDecls, FunctionalDependencies, FlexibleContexts, ScopedTypeVariables, TypeOperators #-}
 
-module Proven where
+module Proven.Basic where
 
-import Control.Monad
-import Data.Proxy
-import Data.Maybe
 import GHC.Exts (Constraint)
+import Proven.Proven
 
 data TBool = TFalse | TTrue
 data SBool (b :: TBool) where
@@ -51,17 +49,17 @@ type family IsZero (a :: TNat) :: TBool where
     IsZero TZero = TTrue
     IsZero n     = TFalse
 
-class Sing (t :: k) (s :: k -> *) | t -> s where
+class Sing (s :: k -> *) (t :: k) | t -> s where
     sing :: s t
 
-instance Sing TFalse SBool where
+instance Sing SBool TFalse where
     sing = SFalse
-instance Sing TTrue SBool where
+instance Sing SBool TTrue where
     sing = STrue
 
-instance Sing TZero SNat where
+instance Sing SNat TZero where
     sing = SZero
-instance (Sing n SNat) => Sing (TSucc n) SNat where
+instance (Sing SNat n) => Sing SNat (TSucc n) where
     sing = SSucc (sing :: SNat n)
 
 
@@ -74,37 +72,19 @@ type family Elem (a :: k) (as :: [k]) :: Constraint where
     Elem a (b ': tl) = a `Elem` tl
 
 
-newtype Verified p a = Verified { unVerified :: a }
-
-class Property p a where
-    check     :: a -> Maybe (Verified p a)
-
-instance Property '[] a where
-    check = Just . Verified
-
-instance (Property p1 a, Property ps a) => Property (p1 ': ps) a where
-    check a = do
-        check a :: Maybe (Verified p1 a)
-        check a :: Maybe (Verified ps a)
-        return (Verified a)
-
-(<?>) :: (Property p a) => (Verified p a -> b) -> a -> Maybe b
-f <?> a = f `fmap` (check a)
-
-
 data NonEmpty
 instance Property NonEmpty [a] where
     check [] = Nothing
     check xs = Just (Verified xs)
 
 data LengthMin (min :: TNat)
-instance (Sing min SNat) => Property (LengthMin min) [a] where
+instance (Sing SNat min) => Property (LengthMin min) [a] where
     check xs
         | length xs >= toInt (sing :: SNat min) = Just (Verified xs)
         | otherwise = Nothing
 
 data LengthMax (max :: TNat)
-instance (Sing max SNat) => Property (LengthMax max) [a] where
+instance (Sing SNat max) => Property (LengthMax max) [a] where
     check xs
         | length xs <= toInt (sing :: SNat max) = Just (Verified xs)
         | otherwise = Nothing
@@ -133,5 +113,4 @@ demo = do
 
 --    let smieszek = check [1, 3, 5] :: Maybe (Verified (LengthMin T2) [Int])
 --    print $ fmap safeHead smieszek
-
 

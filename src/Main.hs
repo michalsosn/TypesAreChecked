@@ -7,7 +7,7 @@ import qualified Hungry
 import qualified Security
 import qualified Total
 import qualified Expanding
-import qualified Proven
+import qualified Proven.Basic as Proven
 import qualified Reccer
 
 class Chuj a where
@@ -34,9 +34,9 @@ main = do
 --    print (chuj 3 :: [KamieniKupa])
     --print kamieniKupuj
     --Arith.main
-    Hungry.demo
-    Security.demo
-    Total.demo
-    Expanding.demo
+--    Hungry.demo
+--    Security.demo
+--    Total.demo
+--    Expanding.demo
+--    Reccer.demo
     Proven.demo
-    Reccer.demo
