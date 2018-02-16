@@ -7,8 +7,9 @@ import qualified Hungry
 import qualified Security
 import qualified Total
 import qualified Expanding
-import qualified Proven.Basic as Proven
+import qualified Proven.Demo as Proven
 import qualified Reccer
+import qualified Strict.Demo as Strict
 
 class Chuj a where
     chuj :: Int -> [a]
@@ -40,3 +41,4 @@ main = do
 --    Expanding.demo
 --    Reccer.demo
     Proven.demo
+--    Strict.demo

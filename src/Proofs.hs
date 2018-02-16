@@ -54,7 +54,7 @@ premise2 _ = undefined  -- but I don't know how can I properly populate this typ
 -- | m => q
 goal :: M -> Q
 goal m =
-    let step1 = premise2 m          :: Either P Q
+    let step1 = implElim premise2 m :: Either P Q
         step2 = implIntro           :: Q -> Q
     in  orElim premise1 step2 step1 :: Q
 

@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Arith (main) where
 
 import Control.Monad.Error

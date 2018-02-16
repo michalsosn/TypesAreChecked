@@ -1,25 +1,16 @@
-{-#LANGUAGE TypeFamilies, DataKinds, PolyKinds, FunctionalDependencies, ScopedTypeVariables, TypeOperators, FlexibleInstances #-}
+{-#LANGUAGE TypeFamilies, PolyKinds #-}
 
 module Proven.Proven where
 
-import Data.Maybe
+import GHC.Exts (Constraint)
 
-newtype Verified p a = Verified { unVerified :: a }
+type family Concat (as :: [k]) (bs :: [k]) :: [k] where
+    Concat '[]       bs = bs
+    Concat (a ': tl) bs = a ': (Concat tl bs)
 
-class Property p a where
-    check     :: a -> Maybe (Verified p a)
+type family Elem (a :: k) (as :: [k]) :: Constraint where
+    Elem a (a ': tl) = ()
+    Elem a (b ': tl) = a `Elem` tl
 
-instance Property '[] a where
-    check = Just . Verified
-
-instance (Property p1 a, Property ps a) => Property (p1 ': ps) a where
-    check a = do
-        check a :: Maybe (Verified p1 a)
-        check a :: Maybe (Verified ps a)
-        return (Verified a)
-
-(<?>) :: (Property p a) => (Verified p a -> b) -> a -> Maybe b
-f <?> a = f `fmap` (check a)
-
-
+type family Proven (Property p a)
 
